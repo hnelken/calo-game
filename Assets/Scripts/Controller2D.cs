@@ -15,25 +15,13 @@ public class Controller2D : MonoBehaviour {
 
 	// MARK: - Private Variables
 
+	float maxClimbAngle = 80;
+
 	float hRaySpacing;
 	float vRaySpacing;
 
 	BoxCollider2D collider;
 	RaycastOrigins origins;
-
-	public struct CollisionInfo {
-		public bool above, below;
-		public bool left, right;
-
-		public void Reset() {
-			above = below = false;
-			left = right = false;
-		}
-	}
-	struct RaycastOrigins {
-		public Vector2 topLeft, topRight;
-		public Vector2 bottomLeft, bottomRight;
-	}
 
 
 	// MARK: - Public API
@@ -80,11 +68,29 @@ public class Controller2D : MonoBehaviour {
 			RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * dirX, rayLength, collisionMask);
 			
 			if (hit) {
-				velocity.x = (hit.distance - skinWidth) * dirX;
-				rayLength = hit.distance;
 
-				collisions.left = dirX == -1;
-				collisions.right = dirX == 1;
+				float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+				if (i == 0 && slopeAngle < maxClimbAngle) {
+					float distToSlope = 0;
+					if (slopeAngle != collisions.slopeAngleOld) {
+						distToSlope = hit.distance - skinWidth;
+						velocity.x -= distToSlope * dirX;
+					}
+					ClimbSlope(ref velocity, slopeAngle);
+					velocity.x += distToSlope * dirX;
+				}
+
+				if (!collisions.climbingSlope || slopeAngle > maxClimbAngle) {
+					velocity.x = (hit.distance - skinWidth) * dirX;
+					rayLength = hit.distance;
+
+					if (collisions.climbingSlope) {
+						velocity.y = Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(velocity.x);
+					}
+
+					collisions.left = dirX == -1;
+					collisions.right = dirX == 1;
+				}
 			}
 
 			Debug.DrawRay(rayOrigin, Vector2.right * dirX * rayLength, Color.white);
@@ -105,11 +111,43 @@ public class Controller2D : MonoBehaviour {
 				velocity.y = (hit.distance - skinWidth) * dirY;
 				rayLength = hit.distance;
 
+				if (collisions.climbingSlope) {
+					velocity.x = velocity.y / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign (velocity.x);
+				}
 				collisions.below = dirY == -1;
 				collisions.above = dirY == 1;
 			}
 
 			Debug.DrawRay(rayOrigin, Vector2.up * dirY * rayLength, Color.white);
+		}
+
+		if (collisions.climbingSlope) {
+			float dirX = Mathf.Sign(velocity.x);
+			rayLength = Mathf.Abs(velocity.x) + skinWidth;
+			Vector2 rayOrigin = ((dirX == -1) ? origins.bottomLeft : origins.bottomRight) + Vector2.up * velocity.y;
+			RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * dirX, rayLength, collisionMask);
+
+			if (hit) {
+				float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+
+				if (slopeAngle != collisions.slopeAngle) {
+					velocity.x = (hit.distance - skinWidth) * dirX;
+					collisions.slopeAngle = slopeAngle;
+				}
+			}
+		}
+	}
+
+	void ClimbSlope(ref Vector3 velocity, float slopeAngle) {
+		float moveDistance = Mathf.Abs (velocity.x);
+		float climbVelY = Mathf.Sin (slopeAngle * Mathf.Deg2Rad) * moveDistance;
+
+		if (velocity.y <= climbVelY) {
+			velocity.y = climbVelY;
+			velocity.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (velocity.x);
+			collisions.below = true;
+			collisions.climbingSlope = true;
+			collisions.slopeAngle = slopeAngle;
 		}
 
 	}
@@ -133,5 +171,29 @@ public class Controller2D : MonoBehaviour {
 
 		hRaySpacing = bounds.size.y / (hRayCount - 1);
 		vRaySpacing = bounds.size.x / (vRayCount - 1);
+	}
+
+
+	// MARK: - Structs
+
+	public struct CollisionInfo {
+		public bool above, below;
+		public bool left, right;
+
+		public bool climbingSlope;
+		public float slopeAngle, slopeAngleOld;
+
+		public void Reset() {
+			above = below = false;
+			left = right = false;
+			climbingSlope = false;
+
+			slopeAngleOld = slopeAngle;
+			slopeAngle = 0;
+		}
+	}
+	struct RaycastOrigins {
+		public Vector2 topLeft, topRight;
+		public Vector2 bottomLeft, bottomRight;
 	}
 }

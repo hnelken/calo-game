@@ -7,9 +7,12 @@ public class Player : MonoBehaviour {
 	public float jumpHeight = 4;
 	public float jumpTime = .4f;
 	public float moveSpeed = 6;
+	float accTimeAir = .2f;
+	float accTimeGround = .1f;
 
 	float gravity;
 	float jumpVelocity;
+	float xSmoothing;
 	Vector3 velocity;
 
 	Controller2D controller;
@@ -19,7 +22,6 @@ public class Player : MonoBehaviour {
 		controller = GetComponent<Controller2D> ();
 		gravity = -(2 * jumpHeight) / Mathf.Pow (jumpTime, 2);
 		jumpVelocity = Mathf.Abs (gravity) * jumpTime;
-		print ("Gravity: " + gravity + " - Jump: " + jumpVelocity);
 	}
 	
 	// Update is called once per frame
@@ -35,7 +37,9 @@ public class Player : MonoBehaviour {
 			velocity.y = jumpVelocity;
 		}
 
-		velocity.x = input.x * moveSpeed;
+		float targetVelocityX = input.x * moveSpeed;
+		velocity.x = Mathf.SmoothDamp (velocity.x, targetVelocityX, ref xSmoothing, (controller.collisions.below) ? accTimeGround : accTimeAir);
+
 		velocity.y += gravity * Time.deltaTime;
 		controller.Move (velocity * Time.deltaTime);
 	}
