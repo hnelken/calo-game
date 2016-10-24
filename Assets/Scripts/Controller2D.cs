@@ -9,8 +9,8 @@ public class Controller2D : MonoBehaviour {
 	const float skinWidth = .015f;
 	public int hRayCount = 4;
 	public int vRayCount = 4;
-
 	public LayerMask collisionMask;
+	public CollisionInfo collisions;
 
 
 	// MARK: - Private Variables
@@ -20,7 +20,16 @@ public class Controller2D : MonoBehaviour {
 
 	BoxCollider2D collider;
 	RaycastOrigins origins;
-	
+
+	public struct CollisionInfo {
+		public bool above, below;
+		public bool left, right;
+
+		public void Reset() {
+			above = below = false;
+			left = right = false;
+		}
+	}
 	struct RaycastOrigins {
 		public Vector2 topLeft, topRight;
 		public Vector2 bottomLeft, bottomRight;
@@ -33,7 +42,8 @@ public class Controller2D : MonoBehaviour {
 	public void Move(Vector3 velocity) {
 		// Get origins for collision detection rays
 		UpdateRaycastOrigins ();
-		
+		collisions.Reset ();
+
 		// Constrain horizontal velocity
 		if (velocity.x != 0) {
 			HorizontalCollisions (ref velocity);
@@ -72,6 +82,9 @@ public class Controller2D : MonoBehaviour {
 			if (hit) {
 				velocity.x = (hit.distance - skinWidth) * dirX;
 				rayLength = hit.distance;
+
+				collisions.left = dirX == -1;
+				collisions.right = dirX == 1;
 			}
 
 			Debug.DrawRay(rayOrigin, Vector2.right * dirX * rayLength, Color.white);
@@ -91,6 +104,9 @@ public class Controller2D : MonoBehaviour {
 			if (hit) {
 				velocity.y = (hit.distance - skinWidth) * dirY;
 				rayLength = hit.distance;
+
+				collisions.below = dirY == -1;
+				collisions.above = dirY == 1;
 			}
 
 			Debug.DrawRay(rayOrigin, Vector2.up * dirY * rayLength, Color.white);
