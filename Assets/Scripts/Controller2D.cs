@@ -1,15 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[RequireComponent (typeof (BoxCollider2D))]
-public class Controller2D : MonoBehaviour {
+public class Controller2D : RaycastController {
 
 	// MARK: - Public References
 
-	const float skinWidth = .015f;
-	public int hRayCount = 4;
-	public int vRayCount = 4;
-	public LayerMask collisionMask;
 	public CollisionInfo collisions;
 
 
@@ -18,14 +13,13 @@ public class Controller2D : MonoBehaviour {
 	float maxClimbAngle = 80;
 	float maxDescendAngle = 75;
 
-	float hRaySpacing;
-	float vRaySpacing;
-
-	BoxCollider2D boxCollider;
-	RaycastOrigins origins;
-
 
 	// MARK: - Public API
+
+	public override void Start() {
+		base.Start ();
+
+	}
 
 	// Move the player with a given velocity
 	public void Move(Vector3 velocity) {
@@ -54,14 +48,6 @@ public class Controller2D : MonoBehaviour {
 
 
 	// MARK: - Private API
-
-	// Use this for initialization
-	void Start () {
-		boxCollider = GetComponent<BoxCollider2D>();
-
-		// Get spacing for collision detection rays
-		CalculateRaySpacing ();
-	}
 
 	// Constrain a velocity vector reference to vertical obstacles
 	void HorizontalCollisions (ref Vector3 velocity) {
@@ -186,27 +172,6 @@ public class Controller2D : MonoBehaviour {
 		}
 	}
 
-	void UpdateRaycastOrigins() {
-		Bounds bounds = boxCollider.bounds;
-		bounds.Expand (skinWidth * -2);
-
-		origins.bottomLeft = new Vector2 (bounds.min.x, bounds.min.y);
-		origins.bottomRight = new Vector2 (bounds.max.x, bounds.min.y);
-		origins.topLeft = new Vector2 (bounds.min.x, bounds.max.y);
-		origins.topRight = new Vector2 (bounds.max.x, bounds.max.y);
-	}
-
-	void CalculateRaySpacing() {
-		Bounds bounds = boxCollider.bounds;
-		bounds.Expand (skinWidth * -2);
-
-		hRayCount = Mathf.Clamp (hRayCount, 2, int.MaxValue);
-		vRayCount = Mathf.Clamp (vRayCount, 2, int.MaxValue);
-
-		hRaySpacing = bounds.size.y / (hRayCount - 1);
-		vRaySpacing = bounds.size.x / (vRayCount - 1);
-	}
-
 
 	// MARK: - Structs
 
@@ -228,9 +193,5 @@ public class Controller2D : MonoBehaviour {
 			slopeAngleOld = slopeAngle;
 			slopeAngle = 0;
 		}
-	}
-	struct RaycastOrigins {
-		public Vector2 topLeft, topRight;
-		public Vector2 bottomLeft, bottomRight;
 	}
 }
