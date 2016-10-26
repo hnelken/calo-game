@@ -22,7 +22,7 @@ public class Controller2D : RaycastController {
 	}
 
 	// Move the player with a given velocity
-	public void Move(Vector3 velocity) {
+	public void Move(Vector3 velocity, bool onPlatform = false) {
 
 		// Get origins for collision detection rays
 		UpdateRaycastOrigins ();
@@ -44,6 +44,10 @@ public class Controller2D : RaycastController {
 
 		// Perform the movements
 		transform.Translate (velocity);
+
+		if (onPlatform) {
+			collisions.below = true;
+		}
 	}
 
 
@@ -60,6 +64,10 @@ public class Controller2D : RaycastController {
 			RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * dirX, rayLength, collisionMask);
 			
 			if (hit) {
+
+				if (hit.distance == 0) {
+					continue;
+				}
 
 				float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
 				if (i == 0 && slopeAngle < maxClimbAngle) {
