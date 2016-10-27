@@ -4,7 +4,8 @@ using System.Collections;
 [RequireComponent (typeof (Controller2D))]
 public class Player : MonoBehaviour {
 
-	public float jumpHeight = 4;
+	public float maxJumpHeight = 4;
+	public float minJumpHeight = 1; 
 	public float jumpTime = .4f;
 	public float moveSpeed = 6;
 	float accTimeAir = .2f;
@@ -19,7 +20,8 @@ public class Player : MonoBehaviour {
 	public Vector2 wallJumpAway;
 
 	float gravity;
-	float jumpVelocity;
+	float maxJumpVelocity;
+	float minJumpVelocity;
 	float xSmoothing;
 	Vector3 velocity;
 
@@ -28,8 +30,9 @@ public class Player : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		controller = GetComponent<Controller2D> ();
-		gravity = -(2 * jumpHeight) / Mathf.Pow (jumpTime, 2);
-		jumpVelocity = Mathf.Abs (gravity) * jumpTime;
+		gravity = -(2 * maxJumpHeight) / Mathf.Pow (jumpTime, 2);
+		maxJumpVelocity = Mathf.Abs (gravity) * jumpTime;
+		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
 	}
 	
 	// Update is called once per frame
@@ -66,11 +69,6 @@ public class Player : MonoBehaviour {
 			}
 		}
 
-
-		if (controller.collisions.above || controller.collisions.below) {
-			velocity.y = 0;
-		}
-
 		if (Input.GetKeyDown (KeyCode.Space)) {
 
 			if (wallSliding) {
@@ -88,11 +86,20 @@ public class Player : MonoBehaviour {
 				}
 			}
 			if (controller.collisions.below) {
-				velocity.y = jumpVelocity;
+				velocity.y = maxJumpVelocity;
+			}
+		}
+		if (Input.GetKeyUp(KeyCode.Space)) {
+			if (velocity.y > minJumpVelocity) {
+				velocity.y = minJumpVelocity;
 			}
 		}
 
 		velocity.y += gravity * Time.deltaTime;
-		controller.Move (velocity * Time.deltaTime);
+		controller.Move (velocity * Time.deltaTime, input);
+
+		if (controller.collisions.above || controller.collisions.below) {
+			velocity.y = 0;
+		}
 	}
 }

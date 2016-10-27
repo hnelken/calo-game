@@ -1,11 +1,11 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/PlatformController.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Player.cs">
     <Files>
-      <File FileName="Assets/Scripts/Player.cs" Line="43" Column="42" />
-      <File FileName="Assets/Scripts/Controller2D.cs" Line="21" Column="1" />
-      <File FileName="Assets/Scripts/PlatformController.cs" Line="18" Column="2" />
-      <File FileName="Assets/Scripts/RaycastController.cs" Line="13" Column="19" />
+      <File FileName="Assets/Scripts/Player.cs" Line="64" Column="10" />
+      <File FileName="Assets/Scripts/Controller2D.cs" Line="65" Column="31" />
+      <File FileName="Assets/Scripts/PlatformController.cs" Line="61" Column="32" />
+      <File FileName="Assets/Scripts/RaycastController.cs" Line="5" Column="49" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
