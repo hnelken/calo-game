@@ -18,7 +18,7 @@ public class Controller2D : RaycastController {
 
 	public override void Start() {
 		base.Start ();
-
+		collisions.faceDir = 1;
 	}
 
 	// Move the player with a given velocity
@@ -29,13 +29,16 @@ public class Controller2D : RaycastController {
 		collisions.Reset ();
 		collisions.velocityOld = velocity;
 
+		if (velocity.x != 0) {
+			collisions.faceDir = (int) Mathf.Sign(velocity.x);
+		}
+
 		// Constrain horizontal velocity
 		if (velocity.y < 0) {
 			DescendSlope(ref velocity);
 		}
-		if (velocity.x != 0) {
-			HorizontalCollisions (ref velocity);
-		}
+
+		HorizontalCollisions (ref velocity);
 		
 		// Constrain vertical velocity
 		if (velocity.y != 0) {
@@ -55,8 +58,12 @@ public class Controller2D : RaycastController {
 
 	// Constrain a velocity vector reference to vertical obstacles
 	void HorizontalCollisions (ref Vector3 velocity) {
-		float dirX = Mathf.Sign (velocity.x);
+		float dirX = collisions.faceDir;
 		float rayLength = Mathf.Abs (velocity.x) + skinWidth;
+
+		if (Mathf.Abs(velocity.x) < skinWidth) {
+			rayLength = 2 * skinWidth; 
+		}
 		
 		for (int i = 0; i < hRayCount; i++) {
 			Vector2 rayOrigin = (dirX == -1) ? origins.bottomLeft : origins.bottomRight;
@@ -190,6 +197,7 @@ public class Controller2D : RaycastController {
 		public bool climbingSlope;
 		public bool descendingSlope;
 		public float slopeAngle, slopeAngleOld;
+		public int faceDir;
 
 		public Vector3 velocityOld;
 
