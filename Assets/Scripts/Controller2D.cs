@@ -6,13 +6,14 @@ public class Controller2D : RaycastController {
 	// MARK: - Public References
 
 	public CollisionInfo collisions;
+	[HideInInspector]
+	public Vector2 playerInput;
 
 
 	// MARK: - Private Variables
 
 	float maxClimbAngle = 80;
 	float maxDescendAngle = 75;
-	Vector2 playerInput;
 
 
 	// MARK: - Public API
@@ -36,7 +37,7 @@ public class Controller2D : RaycastController {
 		playerInput = input;
 
 		if (velocity.x != 0) {
-			collisions.faceDir = (int) Mathf.Sign(velocity.x);
+			collisions.faceDir = (int)Mathf.Sign(velocity.x);
 		}
 
 		// Constrain horizontal velocity
