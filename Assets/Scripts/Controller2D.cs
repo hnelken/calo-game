@@ -23,37 +23,37 @@ public class Controller2D : RaycastController {
 		collisions.faceDir = 1;
 	}
 
-	public void Move(Vector3 velocity, bool onPlatform) {
-		Move (velocity, Vector2.zero, onPlatform);
+	public void Move(Vector2 moveAmount, bool onPlatform) {
+		Move (moveAmount, Vector2.zero, onPlatform);
 	}
 
-	// Move the player with a given velocity
-	public void Move(Vector3 velocity, Vector2 input, bool onPlatform = false) {
+	// Move the player with a given moveAmount
+	public void Move(Vector2 moveAmount, Vector2 input, bool onPlatform = false) {
 
 		// Get origins for collision detection rays
 		UpdateRaycastOrigins ();
 		collisions.Reset ();
-		collisions.velocityOld = velocity;
+		collisions.moveAmountOld = moveAmount;
 		playerInput = input;
 
-		if (velocity.x != 0) {
-			collisions.faceDir = (int)Mathf.Sign(velocity.x);
+		if (moveAmount.x != 0) {
+			collisions.faceDir = (int)Mathf.Sign(moveAmount.x);
 		}
 
-		// Constrain horizontal velocity
-		if (velocity.y < 0) {
-			DescendSlope(ref velocity);
+		// Constrain horizontal moveAmount
+		if (moveAmount.y < 0) {
+			DescendSlope(ref moveAmount);
 		}
 
-		HorizontalCollisions (ref velocity);
+		HorizontalCollisions (ref moveAmount);
 		
-		// Constrain vertical velocity
-		if (velocity.y != 0) {
-			VerticalCollisions (ref velocity);
+		// Constrain vertical moveAmount
+		if (moveAmount.y != 0) {
+			VerticalCollisions (ref moveAmount);
 		}
 
 		// Perform the movements
-		transform.Translate (velocity);
+		transform.Translate (moveAmount);
 
 		if (onPlatform) {
 			collisions.below = true;
@@ -63,12 +63,12 @@ public class Controller2D : RaycastController {
 
 	// MARK: - Private API
 
-	// Constrain a velocity vector reference to vertical obstacles
-	void HorizontalCollisions (ref Vector3 velocity) {
+	// Constrain a moveAmount vector reference to vertical obstacles
+	void HorizontalCollisions (ref Vector2 moveAmount) {
 		float dirX = collisions.faceDir;
-		float rayLength = Mathf.Abs (velocity.x) + skinWidth;
+		float rayLength = Mathf.Abs (moveAmount.x) + skinWidth;
 
-		if (Mathf.Abs(velocity.x) < skinWidth) {
+		if (Mathf.Abs(moveAmount.x) < skinWidth) {
 			rayLength = 2 * skinWidth; 
 		}
 		
@@ -87,23 +87,23 @@ public class Controller2D : RaycastController {
 				if (i == 0 && slopeAngle < maxClimbAngle) {
 					if (collisions.descendingSlope) {
 						collisions.descendingSlope = false;
-						velocity = collisions.velocityOld;
+						moveAmount = collisions.moveAmountOld;
 					}
 					float distToSlope = 0;
 					if (slopeAngle != collisions.slopeAngleOld) {
 						distToSlope = hit.distance - skinWidth;
-						velocity.x -= distToSlope * dirX;
+						moveAmount.x -= distToSlope * dirX;
 					}
-					ClimbSlope(ref velocity, slopeAngle);
-					velocity.x += distToSlope * dirX;
+					ClimbSlope(ref moveAmount, slopeAngle);
+					moveAmount.x += distToSlope * dirX;
 				}
 
 				if (!collisions.climbingSlope || slopeAngle > maxClimbAngle) {
-					velocity.x = (hit.distance - skinWidth) * dirX;
+					moveAmount.x = (hit.distance - skinWidth) * dirX;
 					rayLength = hit.distance;
 
 					if (collisions.climbingSlope) {
-						velocity.y = Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(velocity.x);
+						moveAmount.y = Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveAmount.x);
 					}
 
 					collisions.left = dirX == -1;
@@ -115,14 +115,14 @@ public class Controller2D : RaycastController {
 		}
 	}
 
-	// Constrain a velocity vector reference to vertical obstacles
-	void VerticalCollisions (ref Vector3 velocity) {
-		float dirY = Mathf.Sign (velocity.y);
-		float rayLength = Mathf.Abs (velocity.y) + skinWidth;
+	// Constrain a moveAmount vector reference to vertical obstacles
+	void VerticalCollisions (ref Vector2 moveAmount) {
+		float dirY = Mathf.Sign (moveAmount.y);
+		float rayLength = Mathf.Abs (moveAmount.y) + skinWidth;
 
 		for (int i = 0; i < vRayCount; i++) {
 			Vector2 rayOrigin = (dirY == -1) ? origins.bottomLeft : origins.topLeft;
-			rayOrigin += Vector2.right * (vRaySpacing * i + velocity.x);
+			rayOrigin += Vector2.right * (vRaySpacing * i + moveAmount.x);
 			RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * dirY, rayLength, collisionMask);
 
 			if (hit) {
@@ -140,11 +140,11 @@ public class Controller2D : RaycastController {
 					}
 				}
 
-				velocity.y = (hit.distance - skinWidth) * dirY;
+				moveAmount.y = (hit.distance - skinWidth) * dirY;
 				rayLength = hit.distance;
 
 				if (collisions.climbingSlope) {
-					velocity.x = velocity.y / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign (velocity.x);
+					moveAmount.x = moveAmount.y / Mathf.Tan(collisions.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign (moveAmount.x);
 				}
 				collisions.below = dirY == -1;
 				collisions.above = dirY == 1;
@@ -154,29 +154,29 @@ public class Controller2D : RaycastController {
 		}
 
 		if (collisions.climbingSlope) {
-			float dirX = Mathf.Sign(velocity.x);
-			rayLength = Mathf.Abs(velocity.x) + skinWidth;
-			Vector2 rayOrigin = ((dirX == -1) ? origins.bottomLeft : origins.bottomRight) + Vector2.up * velocity.y;
+			float dirX = Mathf.Sign(moveAmount.x);
+			rayLength = Mathf.Abs(moveAmount.x) + skinWidth;
+			Vector2 rayOrigin = ((dirX == -1) ? origins.bottomLeft : origins.bottomRight) + Vector2.up * moveAmount.y;
 			RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * dirX, rayLength, collisionMask);
 
 			if (hit) {
 				float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
 
 				if (slopeAngle != collisions.slopeAngle) {
-					velocity.x = (hit.distance - skinWidth) * dirX;
+					moveAmount.x = (hit.distance - skinWidth) * dirX;
 					collisions.slopeAngle = slopeAngle;
 				}
 			}
 		}
 	}
 
-	void ClimbSlope(ref Vector3 velocity, float slopeAngle) {
-		float moveDistance = Mathf.Abs (velocity.x);
+	void ClimbSlope(ref Vector2 moveAmount, float slopeAngle) {
+		float moveDistance = Mathf.Abs (moveAmount.x);
 		float climbVelY = Mathf.Sin (slopeAngle * Mathf.Deg2Rad) * moveDistance;
 
-		if (velocity.y <= climbVelY) {
-			velocity.y = climbVelY;
-			velocity.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (velocity.x);
+		if (moveAmount.y <= climbVelY) {
+			moveAmount.y = climbVelY;
+			moveAmount.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (moveAmount.x);
 			collisions.below = true;
 			collisions.climbingSlope = true;
 			collisions.slopeAngle = slopeAngle;
@@ -184,8 +184,8 @@ public class Controller2D : RaycastController {
 
 	}
 
-	void DescendSlope(ref Vector3 velocity) {
-		float dirX = Mathf.Sign (velocity.x);
+	void DescendSlope(ref Vector2 moveAmount) {
+		float dirX = Mathf.Sign (moveAmount.x);
 		Vector2 rayOrigin = (dirX == -1) ? origins.bottomRight : origins.bottomLeft;
 		RaycastHit2D hit = Physics2D.Raycast (rayOrigin, -Vector2.up, Mathf.Infinity, collisionMask);
 
@@ -193,11 +193,11 @@ public class Controller2D : RaycastController {
 			float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
 			if (slopeAngle != 0 && slopeAngle <= maxDescendAngle) {
 				if (Mathf.Sign (hit.normal.x) == dirX) {
-					if (hit.distance - skinWidth <= Mathf.Tan(slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(velocity.x)) {
-						float moveDistance = Mathf.Abs(velocity.x);
+					if (hit.distance - skinWidth <= Mathf.Tan(slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(moveAmount.x)) {
+						float moveDistance = Mathf.Abs(moveAmount.x);
 						float descVelY = Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * moveDistance;
-						velocity.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (velocity.x);
-						velocity.y -= descVelY;
+						moveAmount.x = Mathf.Cos (slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign (moveAmount.x);
+						moveAmount.y -= descVelY;
 
 						collisions.slopeAngle = slopeAngle;
 						collisions.descendingSlope = true;
@@ -224,7 +224,7 @@ public class Controller2D : RaycastController {
 		public int faceDir;
 		public bool fallingThroughPlatform;
 
-		public Vector3 velocityOld;
+		public Vector2 moveAmountOld;
 
 		public void Reset() {
 			above = below = false;

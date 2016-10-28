@@ -3,26 +3,18 @@ using System.Collections;
 
 [RequireComponent (typeof (BoxCollider2D))]
 public class RaycastController : MonoBehaviour {
-	
-	public LayerMask collisionMask;
-
-	public const float skinWidth = .015f;
-	
-	const float distBetweenRays = .25f;
-
-	[HideInInspector]
-	public int hRayCount = 4;
-	[HideInInspector]
-	public int vRayCount = 4;
-
-	[HideInInspector]
-	public float hRaySpacing;
-	[HideInInspector]
-	public float vRaySpacing;
 
 	[HideInInspector]
 	public BoxCollider2D boxCollider;
-	public RaycastOrigins origins;
+	public LayerMask collisionMask;
+	
+	protected const float distBetweenRays = .25f;
+	protected const float skinWidth = .015f;
+	protected float hRaySpacing;
+	protected float vRaySpacing;
+	protected int hRayCount = 4;
+	protected int vRayCount = 4;
+	protected RaycastOrigins origins;
 
 	public virtual void Awake() {
 		boxCollider = GetComponent<BoxCollider2D>();

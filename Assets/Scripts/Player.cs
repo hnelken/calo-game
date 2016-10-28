@@ -4,39 +4,33 @@ using System.Collections;
 [RequireComponent (typeof (Controller2D))]
 public class Player : MonoBehaviour {
 
-	#region Editor Properties
+	public float maxJumpHeight = 4;				// Maximum height of a jump
+	public float minJumpHeight = 1; 			// Minimum height of a jump
+	public float jumpTime = .4f;				// Duration of a jump
+	public float moveSpeed = 6;					// Movement speed
 
-	public float maxJumpHeight = 4;
-	public float minJumpHeight = 1; 
-	public float jumpTime = .4f;
-	public float moveSpeed = 6;
-
-	public float wallSlideSpeedMax = 3;
-	public float wallStickTime = .25f;
+	public float wallSlideSpeedMax = 3;			// Maximum descent speed while wall sliding
+	public float wallStickTime = .25f;			// Total that wall stick resists movement away from wall
 	
-	public Vector2 wallJumpClimb;
-	public Vector2 wallJumpOff;
-	public Vector2 wallJumpAway;
+	public Vector2 wallJumpClimb;				// Wall jump climb velocity vector
+	public Vector2 wallJumpDown;				// Wall jump down velocity vector
+	public Vector2 wallJumpAway;				// Wall jump away velocity vector
 
-	#endregion
+	float accTimeAir = .2f;						// Acceleration time while airborne
+	float accTimeGround = .1f;					// Acceleration time while grounded
+	float timeToWallUnstick;					// Remaining time that wall stick resists movement away from wall
 
-	#region Private Variables
-	float accTimeAir = .2f;
-	float accTimeGround = .1f;
-	float timeToWallUnstick;
+	float gravity;								// Strength of the gravity
+	float maxJumpVelocity;						// Maximum velocity of a jump
+	float minJumpVelocity;						// Minimum velocity of a jump
+	float xSmoothing;							// Smoothing factor in x movement
+	Vector3 velocity;							// General velocity vector
 
-	float gravity;
-	float maxJumpVelocity;
-	float minJumpVelocity;
-	float xSmoothing;
-	Vector3 velocity;
-
-	Controller2D controller;
+	Controller2D controller;					// Controller reference
 	
-	Vector2 directionalInput;
-	bool wallSliding;
-	int wallDirX;
-	#endregion
+	Vector2 directionalInput;					// Input vector
+	bool wallSliding;							// True if wall sliding, false otherwise
+	int wallDirX;								// Direction of the wall collision
 
 	#region Unity Lifecycle
 	// Initialization
@@ -83,8 +77,8 @@ public class Player : MonoBehaviour {
 			}
 			// Jump down
 			else if (directionalInput.x == 0) {
-				velocity.x = -wallDirX * wallJumpOff.x;
-				velocity.y = wallJumpOff.y;
+				velocity.x = -wallDirX * wallJumpDown.x;
+				velocity.y = wallJumpDown.y;
 			}
 			// Jump away
 			else {

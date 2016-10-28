@@ -4,7 +4,7 @@ using System.Collections;
 [RequireComponent (typeof (Player))]
 public class PlayerInput : MonoBehaviour {
 
-	Player player;
+	private Player player;
 
 	// Use this for initialization
 	void Start () {
