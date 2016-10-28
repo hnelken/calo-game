@@ -7,7 +7,12 @@ public class RaycastController : MonoBehaviour {
 	public LayerMask collisionMask;
 
 	public const float skinWidth = .015f;
+	
+	const float distBetweenRays = .25f;
+
+	[HideInInspector]
 	public int hRayCount = 4;
+	[HideInInspector]
 	public int vRayCount = 4;
 
 	[HideInInspector]
@@ -41,9 +46,9 @@ public class RaycastController : MonoBehaviour {
 	public void CalculateRaySpacing() {
 		Bounds bounds = boxCollider.bounds;
 		bounds.Expand (skinWidth * -2);
-		
-		hRayCount = Mathf.Clamp (hRayCount, 2, int.MaxValue);
-		vRayCount = Mathf.Clamp (vRayCount, 2, int.MaxValue);
+
+		hRayCount = Mathf.RoundToInt(bounds.size.y / distBetweenRays);
+		vRayCount = Mathf.RoundToInt(bounds.size.x / distBetweenRays);
 		
 		hRaySpacing = bounds.size.y / (hRayCount - 1);
 		vRaySpacing = bounds.size.x / (vRayCount - 1);
