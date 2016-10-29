@@ -55,7 +55,12 @@ public class Player : MonoBehaviour {
 
 		// Allow platform drop through
 		if (controller.collisions.above || controller.collisions.below) {
-			velocity.y = 0;
+			if (controller.collisions.slidingDownSlope) {
+				velocity.y += controller.collisions.slopeNormal.y * -gravity * Time.deltaTime;
+			}
+			else {
+				velocity.y = 0;
+			}
 		}
 	}
 	#endregion
@@ -89,7 +94,15 @@ public class Player : MonoBehaviour {
 
 		// Normal jump
 		if (controller.collisions.below) {
-			velocity.y = maxJumpVelocity;
+			if (controller.collisions.slidingDownSlope) {
+				if (directionalInput.x != -Mathf.Sign (controller.collisions.slopeNormal.x)) {
+					velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
+					velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
+				}
+			}
+			else {
+				velocity.y = maxJumpVelocity;
+			}
 		}
 	}
 
