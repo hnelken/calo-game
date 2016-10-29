@@ -58,7 +58,7 @@ public class Controller2D : RaycastController {
 
 	// MARK: - Private API
 
-	// Constrain a moveAmount vector reference to vertical obstacles
+	// Constrain a moveAmount vector reference to horizontal obstacles
 	void HorizontalCollisions (ref Vector2 moveAmount) {
 		float dirX = collisions.faceDir;
 		float rayLength = Mathf.Abs (moveAmount.x) + skinWidth;

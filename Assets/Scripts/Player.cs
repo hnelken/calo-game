@@ -18,7 +18,7 @@ public class Player : MonoBehaviour {
 
 
 	// MARK: - Private variables
-	private float accTimeAir = .2f;				// Acceleration time while airborne
+	private float accTimeAir = .1f;				// Acceleration time while airborne
 	private float accTimeGround = .1f;			// Acceleration time while grounded
 	private float timeToWallUnstick;			// Remaining time that wall stick resists movement away from wall
 	private float gravity;						// Strength of the gravity
@@ -26,7 +26,6 @@ public class Player : MonoBehaviour {
 	private float minJumpVelocity;				// Minimum velocity of a jump
 	private float xSmoothing;					// Smoothing factor in x movement
 
-	private bool unstuck;						// True if wall sliding unstick time has elapsed and between wall slides
 	private bool wallSliding;					// True if wall sliding
 	private int wallDirX;						// Direction of the wall collision
 
@@ -45,7 +44,6 @@ public class Player : MonoBehaviour {
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow (jumpTime, 2);
 		maxJumpVelocity = Mathf.Abs (gravity) * jumpTime;
 		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
-		unstuck = true;
 	}
 
 	// Update is called once per frame
@@ -96,7 +94,7 @@ public class Player : MonoBehaviour {
 				velocity.x = -wallDirX * wallJumpAway.x;
 				velocity.y = wallJumpAway.y;
 			}
-			unstuck = true;
+			wallSliding = false;
 		}
 
 		// Grounded jump
@@ -136,18 +134,21 @@ public class Player : MonoBehaviour {
 
 	// Check if the player is wall sliding
 	private void CheckForWallSliding() {
-		wallSliding = false;
 		wallDirX = (controller.collisions.left) ? -1 : 1;
 
 		if (PlayerIsWallSliding()) {
 			HandleWallSliding();
 		}
+		else {
+			wallSliding = false;
+		}
 	}
 	
 	// Modify player velocity to handle wall sliding
 	private void HandleWallSliding() {
-		wallSliding = true;
-		if (directionalInput.x == wallDirX || !unstuck) {
+		if (directionalInput.x == wallDirX || wallSliding) {
+			wallSliding = true;
+
 			if (velocity.y < -wallSlideSpeedMax) {
 				velocity.y = -wallSlideSpeedMax;
 			}
@@ -161,17 +162,15 @@ public class Player : MonoBehaviour {
 				if (PlayerIsUnstickingFromWall()) {
 					timeToWallUnstick -= Time.deltaTime;
 					if (timeToWallUnstick <= 0) {
-						unstuck = true;
+						wallSliding = false;
 					}
 				}
 				else {	// Reset stick time
 					timeToWallUnstick = wallStickTime;
-					unstuck = false;
 				}
 			}
 			else {	// First wall slide frame
 				timeToWallUnstick = wallStickTime;
-				unstuck = false;
 			}
 		}
 	}
@@ -184,7 +183,7 @@ public class Player : MonoBehaviour {
 
 	// Returns true if the player is moving away from a wall
 	private bool PlayerIsUnstickingFromWall() {
-		return directionalInput.x != wallDirX; //&& directionalInput.x != 0;
+		return directionalInput.x != wallDirX;
 	}
 	#endregion
 }
