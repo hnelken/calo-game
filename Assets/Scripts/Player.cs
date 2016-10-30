@@ -73,6 +73,12 @@ public class Player : MonoBehaviour {
 	// Sets player directional input vector
 	public void SetDirectionalInput(Vector2 input) {
 		directionalInput = input;
+		//transform.localScale = new Vector3(0.5f * Mathf.Sign (input.x), 0.4f, 0.5f);
+		if (input.x != 0 && Mathf.Sign (input.x) != Mathf.Sign (transform.localScale.x)) {
+			transform.localScale = new Vector3(-transform.localScale.x,
+			                                   transform.localScale.y,
+			                                   transform.localScale.z);
+		}
 	}
 
 	// Handle jumping
