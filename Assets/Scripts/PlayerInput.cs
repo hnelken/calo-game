@@ -24,5 +24,8 @@ public class PlayerInput : MonoBehaviour {
 		if (Input.GetKeyUp (KeyCode.Space)) {
 			player.OnJumpInputUp();
 		}
+		if (!player.PlayerIsAlive() && Input.GetKeyDown(KeyCode.K)) {
+			player.TogglePlayerDeath();
+		}
 	}
 }

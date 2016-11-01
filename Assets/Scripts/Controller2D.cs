@@ -9,7 +9,7 @@ public class Controller2D : RaycastController {
 	[HideInInspector]
 	public Vector2 playerInput;
 	public float maxSlopeAngle = 80;
-
+	
 
 	// MARK: - Public API
 

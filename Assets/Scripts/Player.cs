@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[RequireComponent (typeof (DeathManager))]
 [RequireComponent (typeof (Controller2D))]
 public class Player : MonoBehaviour {
 
@@ -27,19 +28,22 @@ public class Player : MonoBehaviour {
 	private float xSmoothing;					// Smoothing factor in x movement
 
 	private bool wallSliding;					// True if wall sliding
+	private int faceDirX;						// Direction the player is facing
 	private int wallDirX;						// Direction of the wall collision
 
 	private Vector2 velocity;					// 2D velocity vector
 	private Vector2 directionalInput;			// Input vector
 
 	private Controller2D controller;			// Controller reference
+	private DeathManager deathManager;			// Death manager
 
-
-
+	
 	#region Unity Lifecycle
 	// Initialization
 	void Start () {
 		// Set controller, gravity, min and max jump velocity
+		faceDirX = 1;
+		deathManager = GetComponent<DeathManager> ();
 		controller = GetComponent<Controller2D> ();
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow (jumpTime, 2);
 		maxJumpVelocity = Mathf.Abs (gravity) * jumpTime;
@@ -48,75 +52,88 @@ public class Player : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		// Get velocity
-		CalculateVelocity();
 
-		// Constrain velocity to wall sliding
-		CheckForWallSliding();
+		if (PlayerIsAlive()) {
+			// Get velocity
+			CalculateVelocity();
 
-		// Move player with modified velocity
-		controller.Move (velocity * Time.deltaTime, directionalInput);
+			// Constrain velocity to wall sliding
+			CheckForWallSliding();
 
-		// Allow platform drop through
-		if (controller.collisions.above || controller.collisions.below) {
-			if (controller.collisions.slidingDownSlope) {
-				velocity.y += controller.collisions.slopeNormal.y * -gravity * Time.deltaTime;
-			}
-			else {
-				velocity.y = 0;
+			// Move player with modified velocity
+			controller.Move (velocity * Time.deltaTime, directionalInput);
+
+			// Allow platform drop through
+			if (controller.collisions.above || controller.collisions.below) {
+				if (controller.collisions.slidingDownSlope) {
+					velocity.y += controller.collisions.slopeNormal.y * -gravity * Time.deltaTime;
+				}
+				else {
+					velocity.y = 0;
+				}
 			}
 		}
 	}
 	#endregion
 
 	#region Public API
+	public bool PlayerIsAlive() {
+		return deathManager.PlayerIsAlive();
+	}
+
 	// Sets player directional input vector
 	public void SetDirectionalInput(Vector2 input) {
 		directionalInput = input;
-		//transform.localScale = new Vector3(0.5f * Mathf.Sign (input.x), 0.4f, 0.5f);
-		if (input.x != 0 && Mathf.Sign (input.x) != Mathf.Sign (transform.localScale.x)) {
-			transform.localScale = new Vector3(-transform.localScale.x,
-			                                   transform.localScale.y,
-			                                   transform.localScale.z);
+
+		if (PlayerIsAlive() && input.x != 0 && Mathf.Sign (input.x) != faceDirX) {
+			FlipCharacter();
+		}
+	}
+
+	// Kill player or bring back to life
+	public void TogglePlayerDeath() {
+		if (PlayerIsAlive()) {
+			deathManager.TogglePlayerDeath();
+		}
+		else {
+			deathManager.RespawnPlayer();
 		}
 	}
 
 	// Handle jumping
 	public void OnJumpInputDown() {
-		// Check for wall jump
-		if (wallSliding) {
-			// Jump climb
-			if (wallDirX == directionalInput.x) {
-				velocity.x = -wallDirX * wallJumpClimb.x;
-				velocity.y = wallJumpClimb.y;
-			}
-			// Jump down
-			else if (directionalInput.x == 0) {
-				velocity.x = -wallDirX * wallJumpDown.x;
-				velocity.y = wallJumpDown.y;
-			}
-			// Jump away
-			else {
-				velocity.x = -wallDirX * wallJumpAway.x;
-				velocity.y = wallJumpAway.y;
-			}
-			wallSliding = false;
-		}
-
-		// Grounded jump
-		if (controller.collisions.below) {
-			// Check if player is sliding down a max slope
-			if (controller.collisions.slidingDownSlope) {
-				// Only allow jumps away from slope
-				if (directionalInput.x == Mathf.Sign (controller.collisions.slopeNormal.x)) {
-					// Jump along slope normal
-					velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
-					velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
+		if (PlayerIsAlive()) {
+			// Check for wall jump
+			if (wallSliding) {
+				// Jump climb
+				if (wallDirX == directionalInput.x) {
+					velocity.x = -wallDirX * wallJumpClimb.x;
+					velocity.y = wallJumpClimb.y;
 				}
+				// Jump away
+				else {
+					velocity.x = -wallDirX * wallJumpAway.x;
+					velocity.y = wallJumpAway.y;
+					FlipCharacter();
+				}
+				wallSliding = false;
 			}
-			else {
-				// Normal jump
-				velocity.y = maxJumpVelocity;
+
+			// Grounded jump
+			if (controller.collisions.below) {
+				// Check if player is sliding down a max slope
+				if (controller.collisions.slidingDownSlope) {
+					// Only allow jumps away from slope
+					if (directionalInput.x == Mathf.Sign (controller.collisions.slopeNormal.x)) {
+						// Jump along slope normal
+						velocity.y = maxJumpVelocity * controller.collisions.slopeNormal.y;
+						velocity.x = maxJumpVelocity * controller.collisions.slopeNormal.x;
+					}
+				}
+				else {
+					// Normal jump
+					velocity.y = maxJumpVelocity;
+				}
 			}
 		}
 	}
@@ -131,6 +148,14 @@ public class Player : MonoBehaviour {
 	#endregion
 
 	#region Private API
+	private void FlipCharacter() {
+		// Flip transform scale
+		transform.localScale = new Vector3(-transform.localScale.x,
+		                                   transform.localScale.y,
+		                                   transform.localScale.z);
+		faceDirX = (int)Mathf.Sign(transform.localScale.x);
+	}
+
 	// Calculate the player velocity based on input
 	private void CalculateVelocity() {
 		float targetVelocityX = directionalInput.x * moveSpeed;
