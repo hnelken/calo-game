@@ -1,0 +1,17 @@
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Assembly-CSharp.dll.mdb
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Assembly-CSharp.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/obj/Debug/Assembly-CSharp.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/obj/Debug/Assembly-CSharp.dll.mdb
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/UnityEngine.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/UnityEditor.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/UnityEngine.UI.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/UnityEngine.Networking.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Mono.Cecil.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Unity.SerializationLogic.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Unity.DataContract.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/ICSharpCode.NRefactory.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Unity.UNetWeaver.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Unity.UNetWeaver.dll.mdb
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Unity.CecilTools.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Mono.Cecil.Pdb.dll
+/Users/hnelken/Desktop/dev/unity/projects/Calo-TresGame/Temp/bin/Debug/Mono.Cecil.Mdb.dll

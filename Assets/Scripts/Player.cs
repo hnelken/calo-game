@@ -150,10 +150,13 @@ public class Player : MonoBehaviour {
 	#region Private API
 	private void FlipCharacter() {
 		// Flip transform scale
-		transform.localScale = new Vector3(-transform.localScale.x,
-		                                   transform.localScale.y,
-		                                   transform.localScale.z);
-		faceDirX = (int)Mathf.Sign(transform.localScale.x);
+		var sprite = GetComponent<SpriteRenderer>();
+		sprite.flipX = !sprite.flipX;
+		faceDirX = -faceDirX;
+		//transform.localScale = new Vector3(-transform.localScale.x,
+		//                                   transform.localScale.y,
+		//                                   transform.localScale.z);
+		//faceDirX = (int)Mathf.Sign(transform.localScale.x);
 	}
 
 	// Calculate the player velocity based on input
