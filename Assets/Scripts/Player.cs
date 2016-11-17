@@ -114,7 +114,7 @@ public class Player : MonoBehaviour {
 				else {
 					velocity.x = -wallDirX * wallJumpAway.x;
 					velocity.y = wallJumpAway.y;
-					FlipCharacter();
+					//FlipCharacter();
 				}
 				wallSliding = false;
 			}
@@ -153,10 +153,6 @@ public class Player : MonoBehaviour {
 		var sprite = GetComponent<SpriteRenderer>();
 		sprite.flipX = !sprite.flipX;
 		faceDirX = -faceDirX;
-		//transform.localScale = new Vector3(-transform.localScale.x,
-		//                                   transform.localScale.y,
-		//                                   transform.localScale.z);
-		//faceDirX = (int)Mathf.Sign(transform.localScale.x);
 	}
 
 	// Calculate the player velocity based on input
