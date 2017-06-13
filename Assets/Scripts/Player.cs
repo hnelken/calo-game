@@ -36,6 +36,7 @@ public class Player : MonoBehaviour {
 
 	private Controller2D controller;			// Controller reference
 	private DeathManager deathManager;			// Death manager
+	private Animator animator;
 
 	
 	#region Unity Lifecycle
@@ -45,6 +46,7 @@ public class Player : MonoBehaviour {
 		faceDirX = 1;
 		deathManager = GetComponent<DeathManager> ();
 		controller = GetComponent<Controller2D> ();
+		animator = GetComponent<Animator>();
 		gravity = -(2 * maxJumpHeight) / Mathf.Pow (jumpTime, 2);
 		maxJumpVelocity = Mathf.Abs (gravity) * jumpTime;
 		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
@@ -103,6 +105,8 @@ public class Player : MonoBehaviour {
 	// Handle jumping
 	public void OnJumpInputDown() {
 		if (PlayerIsAlive()) {
+			animator.SetBool("isJumping", true);
+
 			// Check for wall jump
 			if (wallSliding) {
 				// Jump climb
@@ -140,6 +144,7 @@ public class Player : MonoBehaviour {
 
 	// Handle variable jump height on jump input up
 	public void OnJumpInputUp() {
+		
 		// Shorten jump height on early release
 		if (velocity.y > minJumpVelocity) {
 			velocity.y = minJumpVelocity;

@@ -9,6 +9,8 @@ public class Controller2D : RaycastController {
 	[HideInInspector]
 	public Vector2 playerInput;
 	public float maxSlopeAngle = 80;
+
+	private Animator animator;
 	
 
 	// MARK: - Public API
@@ -16,6 +18,16 @@ public class Controller2D : RaycastController {
 	public override void Start() {
 		base.Start ();
 		collisions.faceDir = 1;
+		animator = GetComponent<Animator>();
+	}
+
+	public void Update() {
+		if (collisions.below) {
+			animator.SetBool("isGrounded", true);
+		}
+		else if (animator.GetBool("isGrounded")) {
+			animator.SetBool("isGrounded", false);
+		}
 	}
 
 	public void Move(Vector2 moveAmount, bool onPlatform) {
@@ -45,6 +57,12 @@ public class Controller2D : RaycastController {
 		// Constrain vertical moveAmount
 		if (moveAmount.y != 0) {
 			VerticalCollisions (ref moveAmount);
+
+			if (animator.GetBool("isJumping")) {
+				if (moveAmount.y < 0) {
+					animator.SetBool("isJumping", false);
+				}
+			}
 		}
 
 		// Perform the movements
