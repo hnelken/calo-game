@@ -3,7 +3,11 @@ using System.Collections;
 
 public class DeathZone : MonoBehaviour {
 
-	public Player player;
+	private Player player;
+
+	void Start() {
+		player = GameObject.FindObjectOfType<Player>();
+	}
 
 	void OnTriggerEnter2D(Collider2D collider) {
 		if (collider.tag == "Player") {

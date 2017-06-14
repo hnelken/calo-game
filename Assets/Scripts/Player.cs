@@ -87,6 +87,13 @@ public class Player : MonoBehaviour {
 	public void SetDirectionalInput(Vector2 input) {
 		directionalInput = input;
 
+		if (input.x != 0){
+			animator.SetBool("isWalking", true);
+		}
+		else if (animator.GetBool("isWalking")) {
+			animator.SetBool("isWalking", false);
+		}
+
 		if (PlayerIsAlive() && input.x != 0 && Mathf.Sign (input.x) != faceDirX) {
 			FlipCharacter();
 		}
@@ -105,10 +112,10 @@ public class Player : MonoBehaviour {
 	// Handle jumping
 	public void OnJumpInputDown() {
 		if (PlayerIsAlive()) {
-			animator.SetBool("isJumping", true);
 
 			// Check for wall jump
 			if (wallSliding) {
+				animator.SetBool("isJumping", true);
 				// Jump climb
 				if (wallDirX == directionalInput.x) {
 					velocity.x = -wallDirX * wallJumpClimb.x;
@@ -125,6 +132,7 @@ public class Player : MonoBehaviour {
 
 			// Grounded jump
 			if (controller.collisions.below) {
+				animator.SetBool("isJumping", true);
 				// Check if player is sliding down a max slope
 				if (controller.collisions.slidingDownSlope) {
 					// Only allow jumps away from slope
