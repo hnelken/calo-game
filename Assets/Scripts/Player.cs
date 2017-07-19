@@ -1,14 +1,17 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 [RequireComponent (typeof (DeathManager))]
 [RequireComponent (typeof (Controller2D))]
 public class Player : MonoBehaviour {
 
+	private const float WALK_JUMPTIME = .36f;
+	private const float RUN_JUMPTIME = .18f;
+
 	// MARK: - Editor properties
 	public float maxJumpHeight = 4;				// Maximum height of a jump
 	public float minJumpHeight = 1; 			// Minimum height of a jump
-	public float jumpTime = .4f;				// Duration of a jump
 	public float moveSpeed = 6;					// Movement speed
 	public float wallSlideSpeedMax = 3;			// Maximum descent speed while wall sliding
 	public float wallStickTime = .25f;			// Total that wall stick resists movement away from wall
@@ -19,6 +22,7 @@ public class Player : MonoBehaviour {
 
 
 	// MARK: - Private variables
+	private float jumpTime = .4f;				// Duration of a jump
 	private float accTimeAir = .1f;				// Acceleration time while airborne
 	private float accTimeGround = .1f;			// Acceleration time while grounded
 	private float timeToWallUnstick;			// Remaining time that wall stick resists movement away from wall
@@ -51,6 +55,7 @@ public class Player : MonoBehaviour {
 		controller = GetComponent<Controller2D> ();
 		animator = GetComponent<Animator>();
 
+		jumpTime = WALK_JUMPTIME;
 		SetGravity();
 		runTime = -1f;
 		maxJumpVelocity = Mathf.Abs (gravity) * jumpTime;
@@ -84,6 +89,7 @@ public class Player : MonoBehaviour {
 	#endregion
 
 	#region Public API
+
 	public bool PlayerIsAlive() {
 		return deathManager.PlayerIsAlive();
 	}
@@ -106,6 +112,11 @@ public class Player : MonoBehaviour {
 		if (PlayerIsAlive() && input.x != 0 && Mathf.Sign (input.x) != faceDirX) {
 			FlipCharacter();
 		}
+	}
+
+	public void CompleteLevel(string nextLevel) {
+		//Debug.Log(nextLevel);
+		SceneManager.LoadScene(nextLevel);
 	}
 
 	// Kill player or bring back to life
@@ -208,7 +219,7 @@ public class Player : MonoBehaviour {
 		runTime = -1f;
 		moveSpeed = 10f;
 		maxJumpHeight = 1f;
-		jumpTime = .17f;
+		jumpTime = RUN_JUMPTIME;
 		SetGravity();
 	}
 
@@ -219,7 +230,7 @@ public class Player : MonoBehaviour {
 		runTime = -1f;
 		moveSpeed = 6f;
 		maxJumpHeight = 3.7f;
-		jumpTime = .35f;
+		jumpTime = WALK_JUMPTIME;
 		SetGravity();
 	}
 
