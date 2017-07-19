@@ -26,7 +26,10 @@ public class Player : MonoBehaviour {
 	private float maxJumpVelocity;				// Maximum velocity of a jump
 	private float minJumpVelocity;				// Minimum velocity of a jump
 	private float xSmoothing;					// Smoothing factor in x movement
+	private float runTime;						// The time running can be triggered until
 
+	private bool movingLeft;					// True if last directional input was left
+	private bool running;						// True if running
 	private bool wallSliding;					// True if wall sliding
 	private int faceDirX;						// Direction the player is facing
 	private int wallDirX;						// Direction of the wall collision
@@ -36,7 +39,7 @@ public class Player : MonoBehaviour {
 
 	private Controller2D controller;			// Controller reference
 	private DeathManager deathManager;			// Death manager
-	private Animator animator;
+	private Animator animator;					// Sprite animator
 
 	
 	#region Unity Lifecycle
@@ -47,7 +50,9 @@ public class Player : MonoBehaviour {
 		deathManager = GetComponent<DeathManager> ();
 		controller = GetComponent<Controller2D> ();
 		animator = GetComponent<Animator>();
-		gravity = -(2 * maxJumpHeight) / Mathf.Pow (jumpTime, 2);
+
+		SetGravity();
+		runTime = -1f;
 		maxJumpVelocity = Mathf.Abs (gravity) * jumpTime;
 		minJumpVelocity = Mathf.Sqrt(2 * Mathf.Abs(gravity) * minJumpHeight);
 	}
@@ -83,6 +88,10 @@ public class Player : MonoBehaviour {
 		return deathManager.PlayerIsAlive();
 	}
 
+	public bool PlayerMovingLeft() {
+		return movingLeft;
+	}
+
 	// Sets player directional input vector
 	public void SetDirectionalInput(Vector2 input) {
 		directionalInput = input;
@@ -109,6 +118,33 @@ public class Player : MonoBehaviour {
 		}
 	}
 
+	public void OnRunInputDown(bool left) {
+		if (movingLeft != left) {
+			runTime = -1f;
+			movingLeft = left;
+		}
+
+		if (!running) {
+			if (PlayerCanRun()) {
+				StartRunning();
+			}
+			else {
+				
+				Debug.Log("Run Now Primed");
+				runTime = Time.time + 0.25f;
+			}
+		}
+		else {
+			StopRunning();
+		}
+	}
+
+	public void OnRunInputUp() {
+		if (running) {
+			StopRunning();
+		}
+	}
+
 	// Handle jumping
 	public void OnJumpInputDown() {
 		if (PlayerIsAlive()) {
@@ -125,7 +161,6 @@ public class Player : MonoBehaviour {
 				else {
 					velocity.x = -wallDirX * wallJumpAway.x;
 					velocity.y = wallJumpAway.y;
-					//FlipCharacter();
 				}
 				wallSliding = false;
 			}
@@ -161,6 +196,31 @@ public class Player : MonoBehaviour {
 	#endregion
 
 	#region Private API
+
+	private void SetGravity() {
+		gravity = -(2 * maxJumpHeight) / Mathf.Pow (jumpTime, 2);
+	}
+
+	private void StartRunning() {
+		Debug.Log("Running");
+		running = true;
+		runTime = -1f;
+		moveSpeed = 10f;
+		maxJumpHeight = 1f;
+		jumpTime = .17f;
+		SetGravity();
+	}
+
+	private void StopRunning() {
+		Debug.Log("Run ended");
+		running = false;
+		runTime = -1f;
+		moveSpeed = 6f;
+		maxJumpHeight = 3.7f;
+		jumpTime = .35f;
+		SetGravity();
+	}
+
 	private void FlipCharacter() {
 		// Flip transform scale
 		var sprite = GetComponent<SpriteRenderer>();
@@ -180,6 +240,9 @@ public class Player : MonoBehaviour {
 		wallDirX = (controller.collisions.left) ? -1 : 1;
 
 		if (PlayerIsWallSliding()) {
+			if (running) {
+				StopRunning();
+			}
 			HandleWallSliding();
 		}
 		else {
@@ -215,6 +278,15 @@ public class Player : MonoBehaviour {
 			else {	// First wall slide frame
 				timeToWallUnstick = wallStickTime;
 			}
+		}
+	}
+
+	private bool PlayerCanRun() {
+		if (runTime < 0) {
+			return false;
+		}
+		else {
+			return Time.time <= runTime;
 		}
 	}
 

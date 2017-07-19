@@ -27,5 +27,15 @@ public class PlayerInput : MonoBehaviour {
 		if (!player.PlayerIsAlive() && Input.GetKeyDown(KeyCode.K)) {
 			player.TogglePlayerDeath();
 		}
+
+		if (Input.GetKeyDown(KeyCode.A)) {
+			player.OnRunInputDown(true);
+		}
+		else if (Input.GetKeyDown(KeyCode.D)) {
+			player.OnRunInputDown(false);
+		}
+		else if (Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D)) {
+			player.OnRunInputUp();
+		}
 	}
 }
