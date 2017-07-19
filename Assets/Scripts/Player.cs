@@ -203,6 +203,7 @@ public class Player : MonoBehaviour {
 
 	private void StartRunning() {
 		Debug.Log("Running");
+		animator.SetFloat("motionSpeed", 1.0f);
 		running = true;
 		runTime = -1f;
 		moveSpeed = 10f;
@@ -213,6 +214,7 @@ public class Player : MonoBehaviour {
 
 	private void StopRunning() {
 		Debug.Log("Run ended");
+		animator.SetFloat("motionSpeed", 0.0f);
 		running = false;
 		runTime = -1f;
 		moveSpeed = 6f;

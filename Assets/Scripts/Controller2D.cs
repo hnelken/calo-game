@@ -28,6 +28,7 @@ public class Controller2D : RaycastController {
 		else if (animator.GetBool("isGrounded")) {
 			animator.SetBool("isGrounded", false);
 		}
+
 	}
 
 	public void Move(Vector2 moveAmount, bool onPlatform) {
